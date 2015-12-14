@@ -1,0 +1,378 @@
+Java 语言的 XML 验证 API
+检查文档是否符合模式
+检查文档是否遵循了模式中规定的规则。不同的解析器和工具支持不同的模式语言如 DTD、W3C XML Schema 语言、RELAX NG 和 Schematron。Java 5™ 增加了统一的验证应用程序编程接口（API），可以把文档和用这种或那种语言编写的模式作比较。了解这种 XML 验证 API。
+验证是一种强大的工具。它可以快速检查输入是否大体上符合预期的形式，立刻拒绝与处理目标相距甚远的文档。如果数据中存在问题，早发现要比晚发现好。 
+
+对于可扩展标记语言（XML）来说，验证一般意味着用各种模式语言为文档内容编写详细的规范，这些语言包括万维网联盟（W3C）的 XML Schema Language (XSD)、RELAX NG、文档类型定义（DTD）和 Schematron 等。有时候验证在解析的同时进行，有时候在解析完成后立刻进行。但一般在对输入的其他处理之前完成。（这一段描述只是粗略来说，因为存在例外。） 
+
+直到最近，程序请求验证的具体应用程序编程接口（API）还随着模式语言和解析器的不同而不同。DTD 和 XSD 是 Simple API for XML (SAX)、文档对象模型（DOM）和 Java™ API for XML Processing (JAXP) 常见的配置选项。RELAX NG 需要自定义的库和 API。Schematron 可以使用 Transformations API for XML(TrAX)，还有其他模式也要求程序员学习更多的 API，尽管执行的操作基本相同。 
+
+Java 5 引入了 javax.xml.validation 包，提供了独立于模式语言的验证服务接口。这个包也可用于 Java 1.3 及更高版本，不过要单独安装 JAXP 1.3。其他产品中，Xerces 2.8 包含了这个库的实现。 
+
+验证
+
+javax.xml.validation API 使用三个类来验证文档：SchemaFactory、Schema 和 Validator。还大量使用了 TrAX 的 javax.xml.transform.Source 接口来表示 XML 文档。简言之，SchemaFactory 读取模式文档（通常是 XML 文件）并创建 Schema 对象。Schema 创建一个 Validator 对象。最后，Validator 对象验证表示为 Source 的 XML 文档。 
+
+清单 1 显示了一个简单的程序，用 DocBook XSD 模式验证在命令行中输入的 URL。 
+清单 1. 验证可扩展超文本标记语言（XHTML）文档
+import java.io.*;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.*;
+import org.xml.sax.SAXException;
+
+public class DocbookXSDCheck {
+
+    public static void main(String[] args) throws SAXException, IOException {
+
+        // 1. Lookup a factory for the W3C XML Schema language
+        SchemaFactory factory = 
+            SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
+        
+        // 2. Compile the schema. 
+        // Here the schema is loaded from a java.io.File, but you could use 
+        // a java.net.URL or a javax.xml.transform.Source instead.
+        File schemaLocation = new File("/opt/xml/docbook/xsd/docbook.xsd");
+        Schema schema = factory.newSchema(schemaLocation);
+    
+        // 3. Get a validator from the schema.
+        Validator validator = schema.newValidator();
+        
+        // 4. Parse the document you want to check.
+        Source source = new StreamSource(args[0]);
+        
+        // 5. Check the document
+        try {
+            validator.validate(source);
+            System.out.println(args[0] + " is valid.");
+        }
+        catch (SAXException ex) {
+            System.out.println(args[0] + " is not valid because ");
+            System.out.println(ex.getMessage());
+        }  
+        
+    }
+
+}
+
+下面是用捆绑到 Java 2 Software Development Kit (JDK) 5.0 的 Xerces 版本检查一个无效文档时的典型输出。 
+
+file:///Users/elharo/CS905/Course_Notes.xml is not valid because cvc-complex-type.2.3: Element 'legalnotice' cannot have character [children], because the type's content type is element-only.
+
+改变验证所依据的模式、要验证的文档甚至使用的模式语言都很简单。但无论什么情况，验证都需要经过下列五个步骤： 
+1.为编写模式所用的语言加载一个模式工厂。
+2.编译源文件中的模式。
+3.用编译后的模式创建一个验证程序。
+4.为需要验证的文档创建 Source 对象。StreamSource 通常最简单。
+5.验证输入的源文档。如果文档无效，validate() 方法将抛出 SAXException。否则什么也不显示。 
+
+可以反复使用同一个验证程序和同一个模式多次。但是所有类都不是线程安全的或者可重入的。如果用多个线程同时验证，一定要保证每个线程有自己的 Validator 和 Schema 对象。 
+
+用文档指定的模式验证
+
+有些文档指定了希望作为验证基础的模式，一般使用 xsi:noNamespaceSchemaLocation 和/或 xsi:schemaLocation 属性来指定，比如：
+
+<document xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://www.example.com/document.xsd">
+  ...
+
+如果创建的模式没有指定 URL、文件或者源，则 Java 语言就会创建一个这样的东西，用于在要验证的文档中查找应该使用的模式。比如： 
+
+SchemaFactory factory = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
+Schema schema = factory.newSchema();
+
+不过通常不希望这样做。一般应该由文档的消费者而不是生产者选择模式。另外，这种方法仅适用于 XSD。其他模式语言都需要明确指定模式的位置。 
+
+抽象工厂
+
+SchemaFactory 是一个抽象工厂。抽象工厂设计模式使得这种 API 能够支持多种不同的模式语言和对象模型。一种实现通常只能支持多种语言和模型的一部分。但是，一旦掌握了用 RELAX NG 模式（比方说）验证 DOM 文档的 API，就能用相同的 API 对 W3C 模式验证 JDOM 文档。 
+
+比如，清单 2 中的程序使用 DocBook 的 RELAX NG 模式验证 DocBook 文档。基本上与 清单 1 相同。惟一的变化是模式位置和标识模式语言的 URL。 
+
+清单 2. 使用 RELAX NG 验证 DocBook 文档
+
+import java.io.*;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.*;
+import org.xml.sax.SAXException;
+
+public class DocbookRELAXNGCheck {
+
+    public static void main(String[] args) throws SAXException, IOException {
+
+        // 1. Specify you want a factory for RELAX NG
+        SchemaFactory factory 
+         = SchemaFactory.newInstance("http://relaxng.org/ns/structure/1.0");
+        
+        // 2. Load the specific schema you want. 
+        // Here I load it from a java.io.File, but we could also use a 
+        // java.net.URL or a javax.xml.transform.Source
+        File schemaLocation = new File("/opt/xml/docbook/rng/docbook.rng");
+        
+        // 3. Compile the schema.
+        Schema schema = factory.newSchema(schemaLocation);
+    
+        // 4. Get a validator from the schema.
+        Validator validator = schema.newValidator();
+        
+        // 5. Parse the document you want to check.
+        String input 
+         = "file:///Users/elharo/Projects/workspace/CS905/build/Java_Course_Notes.xml";
+        
+        // 6. Check the document
+        try {
+            validator.validate(source);
+            System.out.println(input + " is valid.");
+        }
+        catch (SAXException ex) {
+            System.out.println(input + " is not valid because ");
+            System.out.println(ex.getMessage());
+        }  
+        
+    }
+
+}
+
+如果用普通的 Sun JDK 不增加其他库，运行该程序时可能会看到如下所示的结果： 
+
+Exception in thread "main" java.lang.IllegalArgumentException: 
+http://relaxng.org/ns/structure/1.0
+	at javax.xml.validation.SchemaFactory.newInstance(SchemaFactory.java:186)
+	at DocbookRELAXNGCheck.main(DocbookRELAXNGCheck.java:14)
+
+这是因为，JDK 本身没有带 RELAX NG 验证程序。如果不能识别模式语言，SchemaFactory.newInstance() 就会抛出 IllegalArgumentException。但是如果安装了 RELAX NG 库，比如 Jing 和 JAXP 1.3 适配程序，就会与 W3C 模式显示同样的结果。 
+
+确定模式语言
+
+javax.xml.constants 类定义了几个常量来标识模式语言： 
+XMLConstants.W3C_XML_SCHEMA_NS_URI：http://www.w3.org/2001/XMLSchema
+XMLConstants.RELAXNG_NS_URI：http://relaxng.org/ns/structure/1.0
+XMLConstants.XML_DTD_NS_URI：http://www.w3.org/TR/REC-xml
+
+这是一个不完全的列表。实现可以随时向该表增加其他 URL 来标识其他的模式语言。URL 通常是模式语言的名称空间统一资源标识符（URI）。比如，URL http://www.ascc.net/xml/schematron 标识了 Schematron 模式。 
+
+Sun 的 JDK 5 仅支持 XSD 模式。虽然也支持 DTD 验证，但是它不能通过 javax.xml.validation API 使用。对于 DTD，必须使用常规的 SAX XMLReader 类。不过可以另外安装支持不同模式语言的其他库。 
+
+如何定位模式工厂
+
+Java 编程语言没有限制模式工厂只能有一种。可以把标识某种模式语言的 URI 传递给 SchemaFactory.newInstance()，它按照下列顺序搜索匹配的工厂：
+1. 用 "javax.xml.validation.SchemaFactory:schemaURL" 系统属性命名的类 
+2.用 $java.home/lib/jaxp.properties 文件中的 "javax.xml.validation.SchemaFactory:schemaURL" 属性命名的类 
+3. 在任何 Java Archive (JAR) 文件的 META-INF/services 目录中发现的 javax.xml.validation.SchemaFactory 服务提供程序 
+4.平台默认的 SchemaFactory，JDK 5 中为 com.sun.org.apache.xerces.internal.jaxp.validation.xs.SchemaFactoryImpl
+
+要支持自定义的模式语言和对应的验证程序，只需要编写 SchemaFactory、Schema 和 Validator（它们知道如何处理模式语言）的子类。然后将您的 JAR 文件安装到上述四个位置中的一个。对于添加与 W3C XML Schema 语言这类声明性语言相比更适合用 Java 之类的图灵完整语言检查的约束，这一点很重要。可以定义一种微模式语言，编写简单的实现，然后将其插入到验证层。 
+
+错误处理
+
+模式的默认响应方式是，如果遇到问题则抛出 SAXException，否则什么也不做。但是，可以提供 SAX ErrorHandler 来接收关于文档问题的更详尽的信息。比方说，假设要记录所有验证错误，但又不希望遇到错误时停止处理。可以安装一个像 清单 3 那样的错误处理程序。 
+
+清单 3. 使用 RELAX NG 验证 DocBook 文档
+
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+
+public class ForgivingErrorHandler implements ErrorHandler {
+
+    public void warning(SAXParseException ex) {
+        System.err.println(ex.getMessage());
+    }
+
+    public void error(SAXParseException ex) {
+        System.err.println(ex.getMessage());
+    }
+
+    public void fatalError(SAXParseException ex) throws SAXException {
+        throw ex;
+    }
+
+}
+
+要安装该错误处理程序，需要创建它的一个实例并传递给 Validator 的 setErrorHandler() 方法： 
+
+  ErrorHandler lenient = new ForgivingErrorHandler();
+  validator.setErrorHandler(lenient);
+
+模式扩充
+
+有些模式不仅仅执行验证。除了用是否回答文档有效与否的问题外，还为文档补充 其他信息。比方说，可以提供默认的属性值。还可以给元素或属性赋予 int 或 gYear 这样的类型。验证程序可以创建这种补充了类型信息的文档，并写入 javax.xml.transform.Result 对象。只需要传递 Result 作为验证的第二个参数。比如，清单 4 在验证输入文档的同时，还创建结合有模式输入的扩展后的 DOM 文档。 
+
+清单 4. 用模式扩充文档
+
+import java.io.*;
+import javax.xml.transform.dom.*;
+import javax.xml.validation.*;
+import javax.xml.parsers.*;
+import org.w3c.dom.*;
+import org.xml.sax.SAXException;
+
+public class DocbookXSDAugmenter {
+
+    public static void main(String[] args) 
+      throws SAXException, IOException, ParserConfigurationException {
+
+        SchemaFactory factory 
+         = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
+        File schemaLocation = new File("/opt/xml/docbook/xsd/docbook.xsd");
+        Schema schema = factory.newSchema(schemaLocation);
+        Validator validator = schema.newValidator();
+        
+        DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
+        domFactory.setNamespaceAware(true); // never forget this
+        DocumentBuilder builder = domFactory.newDocumentBuilder();
+        Document doc = builder.parse(new File(args[0]));
+        
+        DOMSource source = new DOMSource(doc);
+        DOMResult result = new DOMResult();
+        
+        try {
+            validator.validate(source, result);
+            Document augmented = (Document) result.getNode();
+            // do whatever you need to do with the augmented document...
+        }
+        catch (SAXException ex) {
+            System.out.println(args[0] + " is not valid because ");
+            System.out.println(ex.getMessage());
+        }  
+        
+    }
+
+}
+
+这个过程的输入和输出都有一定的限制。不能用于所有的流输入和输出。SAX 源可以扩展成 SAX 结果，DOM 源扩展成 DOM 结果，但是 SAX 源不能扩展成 DOM 结果，反之亦然。如果需要这么做，首先扩展成匹配的结果：SAX 对 SAX、 DOM 对 DOM，然后使用 TrAX 的恒等转换改变模型。 
+
+但不建议使用这种技术。将文档需要的全部信息放在一个实例中，要比分解成实例和模式更可靠。您可以验证，但并非所有的人都能验证。 
+
+类型信息
+
+W3C XML Schema Language 在很大程度上依赖于类型 这一概念。元素和属性被声明为 int、double、date、duration、person、PhoneNumber 或其他您能够想到的类型。Java Validation API 提供了一种手段来报告这些类型，虽然令人吃惊的是该特性独立于包的其他部分。 
+
+类型用 org.w3c.dom.TypeInfo 对象表示。这个简单的接口通过 清单 5 来说明，它给出了类型的本地名和名称空间 URI。还可以告诉您它是否派生自其他类型。除此以外，理解这种类型就是您的程序的任务了。Java 语言没有说明它的含义，或者将其转化成 double 和 java.util.Date 这样的 Java 类型。 
+
+清单 5. DOM TypeInfo 接口
+
+package org.w3c.dom;
+
+public interface TypeInfo {
+
+  public static final int DERIVATION_RESTRICTION;
+  public static final int DERIVATION_EXTENSION;
+  public static final int DERIVATION_UNION;
+
+  public String  getTypeName();
+  public String  getTypeNamespace()
+  public boolean isDerivedFrom(String namespace, String name, int derivationMethod);
+
+}
+
+要获得 TypeInfo 对象，需要向 Schema 对象请求 ValidatorHandler 而不是 Validator。ValidatorHandler 实现了 SAX 的 ContentHandler 接口。然后将该处理程序安装到 SAX 解析器中。 
+
+还要在 ValidatorHandler（不是解析器）中安装您自己的 ContentHandler，ValidatorHandler 将把扩展的事件转发到您的 ContentHandler。 
+
+ValidatorHandler 提供了 TypeInfoProvider，ContentHandler 可以随时调用查看当前元素或其属性的类型。它还可以告诉您该属性是否是 ID，属性是在文档中明确指定的还是模式中的默认值。清单 6 对这个类作了概括。 
+
+清单 6. TypeInfoProvider 类
+
+package javax.xml.validation;
+
+public abstract class TypeInfoProvider {
+
+  public abstract TypeInfo getElementTypeInfo();
+  public abstract TypeInfo getAttributeTypeInfo(int index);
+  public abstract boolean  isIdAttribute(int index);
+  public abstract boolean  isSpecified(int index);
+
+}
+
+最后，用 SAX XMLReader 解析文档。清单 7 是一个简单的程序，它利用了所有这些类和接口打印出文档所有元素的类型名。 
+
+清单 7. 列举元素类型
+
+import java.io.*;
+import javax.xml.validation.*;
+
+import org.xml.sax.*;
+import org.xml.sax.helpers.*;
+
+public class TypeLister extends DefaultHandler {
+
+    private TypeInfoProvider provider;
+    
+    public TypeLister(TypeInfoProvider provider) {
+        this.provider = provider;
+    }
+
+    public static void main(String[] args) throws SAXException, IOException {
+
+        SchemaFactory factory 
+         = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
+        File schemaLocation = new File("/opt/xml/docbook/xsd/docbook.xsd");
+        Schema schema = factory.newSchema(schemaLocation);
+    
+        ValidatorHandler vHandler = schema.newValidatorHandler();
+        TypeInfoProvider provider = vHandler.getTypeInfoProvider();
+        ContentHandler   cHandler = new TypeLister(provider);
+        vHandler.setContentHandler(cHandler);
+        
+        XMLReader parser = XMLReaderFactory.createXMLReader();
+        parser.setContentHandler(vHandler);
+        parser.parse(args[0]);
+        
+    }
+    
+    public void startElement(String namespace, String localName,
+      String qualifiedName, Attributes atts) throws SAXException {
+        String type = provider.getElementTypeInfo().getTypeName();
+        System.out.println(qualifiedName + ": " + type);
+    }
+
+}
+
+下面列出了对典型的 DocBook 文档运行上述代码的结果的开始部分： 
+
+book: #AnonType_book
+title: #AnonType_title
+subtitle: #AnonType_subtitle
+info: #AnonType_info
+copyright: #AnonType_copyright
+year: #AnonType_year
+holder: #AnonType_holder
+author: #AnonType_author
+personname: #AnonType_personname
+firstname: #AnonType_firstname
+othername: #AnonType_othername
+surname: #AnonType_surname
+personblurb: #AnonType_personblurb
+para: #AnonType_para
+link: #AnonType_link
+
+可以看到，DocBook 模式赋予大多数元素以匿名的复杂类型。显然，结果会随着模式的不同而变化。 
+
+结束语
+
+如果所有人都说同一种语言，世界会变得更加单调。如果只有一种编程语言可以选择，程序员也会感到不高兴。不同的语言更适合不同的任务，有些任务需要不只一种语言。XML 模式也不例外。您可以从各种各样的模式语言中选择。拥有了 Java 5 及其 javax.xml.validation，就能用一种 API 处理所有这些模式语言。 
+
+参考资料 
+
+学习
+Kicking back with RELAX NG（David Mertz，developerWorks，2003 年 2 月）介绍了 RELAX NG 模式语言。
+A hands-on introduction to Schematron（Uche Ogbuji，developerWorks，2004 年 9 月）：这篇教程介绍了 Schematron 模式语言。
+XML 1.1 Bible (Elliotte Rusty Harold; Wiley, 2003) 的 第 20 章 详细介绍了 W3C XML Schema Language。
+XML in a Nutshell（Elliotte Rusty Harold 和 W. Scott Means，O'Reilly，2005 年）包含关于 W3C XML 模式语言以及 DOM 和 TrAX 的完整参考和简洁教程。
+Processing XML with Java（Elliotte Rusty Harold，Addison-Wesley，2002 年）讨论了如何使用 DOM、SAX、TrAX 和其他 API 从 Java 中访问 XML。
+developerWorks 上的 Java 技术专栏 提供有数百篇 Java 编程各方面的文章。
+developerWorks XML 专区 包含大量的技术文章、技巧、教程、标准以及 IBM 红皮书。
+看看如何通过 IBM XML 1.1 及相关技术的认证。
+
+获得产品和技术
+DocBook 5.0 的标准定义是用 RELAX NG 编写的。然后把 RELAX NG 模式编译成用户需要的其他语言，如 DTD 和 W3C 模式。
+从 java.net 下载 JAXP 1.3 for Java 1.3 and 1.4。
+Kohsuke Kawaguchi 编写的 适配器层 可以将 RELAX NG 验证程序如 JING 支持的老式 JARV 接口连接到本文所述的 JAXP API。
+Xerces XML 解析器支持 JAXP 1.3，包括本文讨论的验证 API。
+IBM 试用软件 可直接从 developerWorks 下载。
+
+讨论
+参与 面向 XML 的讨论。
+通过 developerWorks blogs 加入 developerWorks 社区。
