@@ -4,8 +4,8 @@ public class ThreadProcess implements Runnable {
 	private long longQueryTimes = 0;
 
 	public void run() {
-		longQueryTimes = TestBatchCluster.processQueryAndUpdate();
-		//longQueryTimes = TestBatchCluster.processSelectForUpdate();
+		//longQueryTimes = TestBatchCluster.processQueryAndUpdate();
+		longQueryTimes = TestBatchCluster.processSelectForUpdate();
 	}
 
 	public long getQueryTimes() {

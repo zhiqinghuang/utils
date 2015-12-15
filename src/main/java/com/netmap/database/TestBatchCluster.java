@@ -15,20 +15,52 @@ public class TestBatchCluster {
 	public static void main(String[] args) {
 		multiThread();
 		singleThread();
+		System.err.println("-------------------");
+		try {
+			Thread.sleep(100000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		multiThread();
+		singleThread();
+		System.err.println("-------------------");
+		try {
+			Thread.sleep(100000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		multiThread();
+		singleThread();
+		System.err.println("-------------------");
+		try {
+			Thread.sleep(100000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		multiThread();
+		singleThread();
+		System.err.println("-------------------");
+		try {
+			Thread.sleep(100000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		multiThread();
+		singleThread();
 	}
 
 	public static void singleThread() {
-		System.out.println(System.currentTimeMillis());
 		try {
 			Class.forName("oracle.jdbc.driver.OracleDriver").newInstance();
 			// printColumn();
 			testDeleteData();
 			testInsertData();
+			System.out.println("single begin:" + System.currentTimeMillis());
 			processQueryAndUpdate();
+			System.out.println("single end:" + System.currentTimeMillis());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println(System.currentTimeMillis());
 	}
 
 	public static long processSelectForUpdate() {
@@ -115,12 +147,12 @@ public class TestBatchCluster {
 	}
 
 	public static void multiThread() {
-		System.out.println(System.currentTimeMillis());
 		try {
 			Class.forName("oracle.jdbc.driver.OracleDriver").newInstance();
 			// printColumn();
 			testDeleteData();
 			testInsertData();
+			System.out.println("multi begin:" + System.currentTimeMillis());
 			ThreadGroup threadGroup = new ThreadGroup("BatchThread");
 			ThreadProcess batchThreadProcess0 = new ThreadProcess();
 			Thread thread0 = new Thread(threadGroup, batchThreadProcess0, "batchThreadProcess0");
@@ -139,6 +171,7 @@ public class TestBatchCluster {
 			long queryTimes2 = batchThreadProcess2.getQueryTimes();
 			long queryTimes = queryTimes0 + queryTimes1 + queryTimes2;
 			System.out.println("all queryTimes : " + queryTimes);
+			System.out.println("multi end:" + System.currentTimeMillis());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -170,7 +203,7 @@ public class TestBatchCluster {
 		List<String> listKey = new ArrayList<String>();
 		try {
 			StringBuffer sbQuery = new StringBuffer();
-			sbQuery.append("SELECT C_MAIN_REF,C_LOCKED_FLAG FROM EXIMTRX.BILL_TEST WHERE C_LOCKED_FLAG = 'F' FOR UPDATE");
+			sbQuery.append("SELECT C_MAIN_REF,C_LOCKED_FLAG FROM EXIMTRX.BILL_TEST WHERE C_LOCKED_FLAG = 'F' FOR UPDATE SKIP LOCKED");
 			String strQuery = sbQuery.toString();
 			connection.setAutoCommit(false);
 			Statement stmt = connection.prepareStatement(strQuery);
