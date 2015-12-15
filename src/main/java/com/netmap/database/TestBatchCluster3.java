@@ -10,10 +10,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestBatchCluster {
+public class TestBatchCluster3 {
 
 	public static void main(String[] args) {
-		multiThread();
+		//multiThread();
 		singleThread();
 	}
 
@@ -21,11 +21,11 @@ public class TestBatchCluster {
 		try {
 			Class.forName("oracle.jdbc.driver.OracleDriver").newInstance();
 			// printColumn();
-			testDeleteData();
-			testInsertData();
-			System.out.println("single begin:" + System.currentTimeMillis());
+			//testDeleteData();
+			//testInsertData();
+			//System.out.println("single begin:" + System.currentTimeMillis());
 			processQueryAndUpdate();
-			System.out.println("single end:" + System.currentTimeMillis());
+			//System.out.println("single end:" + System.currentTimeMillis());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -35,15 +35,15 @@ public class TestBatchCluster {
 		long longQueryTimes = 0;
 		try {
 			List<String> listUpdatedKey = new ArrayList<String>();
-			Connection connection = TestBatchCluster.getConnection();
+			Connection connection = TestBatchCluster3.getConnection();
 			longQueryTimes++;
-			List<String> listKey = TestBatchCluster.selectForUpdate(connection);
+			List<String> listKey = TestBatchCluster3.selectForUpdate(connection);
 			while (listKey.size() > 0) {
 				for (int i = 0; i < listKey.size(); i++) {
 					String lstrUpdatedKey = listKey.get(i);
 					listUpdatedKey.add(lstrUpdatedKey);
 				}
-				listKey = TestBatchCluster.selectForUpdate(connection);
+				listKey = TestBatchCluster3.selectForUpdate(connection);
 				longQueryTimes++;
 			}
 			System.out.print(listUpdatedKey.size());
@@ -68,11 +68,11 @@ public class TestBatchCluster {
 		long longQueryTimes = 0;
 		try {
 			List<String> listUpdatedKey = new ArrayList<String>();
-			Connection connection = TestBatchCluster.getConnection();
+			Connection connection = TestBatchCluster3.getConnection();
 			longQueryTimes++;
-			List<String> listKey = TestBatchCluster.queryData(connection);
+			List<String> listKey = TestBatchCluster3.queryData(connection);
 			while (listKey.size() > 0) {
-				int[] iReturn = TestBatchCluster.testUpdateableUseStatement(connection, listKey);
+				int[] iReturn = TestBatchCluster3.testUpdateableUseStatement(connection, listKey);
 				if (iReturn != null) {
 					for (int i = 0; i < iReturn.length; i++) {
 						if (iReturn[i] > 0) {
@@ -81,7 +81,7 @@ public class TestBatchCluster {
 						}
 					}
 				}
-				listKey = TestBatchCluster.queryData(connection);
+				listKey = TestBatchCluster3.queryData(connection);
 				longQueryTimes++;
 			}
 			System.out.print(listUpdatedKey.size());
