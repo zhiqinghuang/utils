@@ -13,7 +13,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class Main {
 
 	public static void main(String[] args) throws Exception {
-		migrate();
+		//migrate();
 		testConnectHsqlDB();
 	}
 
@@ -37,6 +37,14 @@ public class Main {
 			Connection c = DriverManager.getConnection("jdbc:hsqldb:mem:flyway_sample", "sa", "");
 			if (c != null) {
 				System.out.println("Connected db success!");
+				String sql = "select name from test_user";
+				Statement st = c.createStatement();
+				st.execute(sql);
+				//sql = "INSERT INTO TBL_USERS(ID, NAME, BIRTHDAY) VALUES ('1', 'ADMIN', SYSDATE);";
+				//st.executeUpdate(sql);
+				if (st != null) {
+					st.close();
+				}
 				/*String sql = "CREATE TABLE TBL_USERS(ID INTEGER, NAME VARCHAR, BIRTHDAY DATE);";
 				Statement st = c.createStatement();
 				st.execute(sql);
