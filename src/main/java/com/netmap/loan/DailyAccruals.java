@@ -41,4 +41,15 @@ public class DailyAccruals {
 	public void setDate(LocalDate date) {
 		this.date = date;
 	}
+
+	public void caculateInterest() {
+		BigDecimal bigTemp = principal.multiply(rate);
+		bigTemp = bigTemp.multiply(new BigDecimal("0.01"));
+		bigTemp = bigTemp.divide(new BigDecimal("12"), 8, BigDecimal.ROUND_HALF_UP);
+		LocalDate localDate = date.dayOfMonth().withMaximumValue();
+		String lstrDaysOfMonth = localDate.dayOfMonth().getAsString();
+		bigTemp = bigTemp.divide(new BigDecimal(lstrDaysOfMonth), 8, BigDecimal.ROUND_HALF_UP);
+		setInterest(bigTemp);
+		System.out.println(date + "	" + bigTemp);
+	}
 }
