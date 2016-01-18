@@ -6,36 +6,36 @@ public class PrincipalEquals {
 
 	public static void main(String[] args) {
 		BigDecimal invest = new BigDecimal("960000"); // 本金
-		double yearRate = 0.0537; // 年利率
-		int year = 30;// 期限
-		double monthRate = yearRate / 12;
-		int month = year * 12;
-		// 每月本息金额 = (本金×月利率×(1＋月利率)＾还款月数)÷ ((1＋月利率)＾还款月数-1)
-		BigDecimal monthIncome = invest.multiply(new BigDecimal(monthRate * Math.pow(1 + monthRate, month))).divide(new BigDecimal(Math.pow(1 + monthRate, month) - 1), 2, BigDecimal.ROUND_HALF_UP);
-		System.out.println("每月本息金额 : " + monthIncome);
-		System.out.println("---------------------------------------------------");
-		// 每月本金 = 本金×月利率×(1+月利率)^(还款月序号-1)÷((1+月利率)^还款月数-1)
-		BigDecimal monthCapital;
-		BigDecimal sumCapital = BigDecimal.ZERO;
-		for (int i = 1; i < month + 1; i++) {
-			monthCapital = invest.multiply(new BigDecimal(monthRate * (Math.pow((1 + monthRate), i - 1)))).divide(new BigDecimal(Math.pow(1 + monthRate, month) - 1), 2, BigDecimal.ROUND_HALF_UP);
-			System.out.println("第" + i + "月本金： " + monthCapital);
-			sumCapital = sumCapital.add(monthCapital);
+		BigDecimal yearRate = new BigDecimal("0.0565"); // 年利率
+		BigDecimal year = new BigDecimal("30");// 期限
+		BigDecimal monthRate = yearRate.divide(new BigDecimal("12"), 8, BigDecimal.ROUND_HALF_UP);
+		BigDecimal month = year.multiply(new BigDecimal("12"));
+		BigDecimal discount = new BigDecimal("0.95");
+		System.out.println(month.intValue());
+		int liMonth = month.intValue();
+		for (int i = 1; i <= liMonth; i++) {
+			BigDecimal principal = invest.divide(month, 2, BigDecimal.ROUND_HALF_UP);
+			BigDecimal monthRemain = new BigDecimal(i - 1);
+			BigDecimal principalRemain = invest.subtract(principal.multiply(monthRemain));
+			if (i == liMonth) {
+				principal = principalRemain;
+			}
+			BigDecimal interestMonth = principalRemain.multiply(yearRate).multiply(discount).divide(new BigDecimal("12"), 2, BigDecimal.ROUND_HALF_UP);
+			if (i%12 == 8) {
+				BigDecimal interestMonth1 = principalRemain.multiply(yearRate).multiply(discount).multiply(new BigDecimal("11")).divide(new BigDecimal("30"), 8, BigDecimal.ROUND_HALF_UP).divide(new BigDecimal("12"), 2, BigDecimal.ROUND_HALF_UP);
+				yearRate = new BigDecimal("0.049");
+				BigDecimal interestMonth2 = principalRemain.multiply(yearRate).multiply(discount).multiply(new BigDecimal("19")).divide(new BigDecimal("30"), 8, BigDecimal.ROUND_HALF_UP).divide(new BigDecimal("12"), 2, BigDecimal.ROUND_HALF_UP);
+				interestMonth = interestMonth1.add(interestMonth2);
+			}
+			System.out.print(i);
+			System.out.print("	");
+			System.out.print(principal);
+			System.out.print("	");
+			System.out.print(interestMonth);
+			System.out.print("	");
+			System.out.print(interestMonth.add(principal));
+			System.out.print("	");
+			System.out.println(principalRemain);
 		}
-		System.out.println("---------------------------------------------------");
-		// 每月利息 = 剩余本金 x 贷款月利率
-		BigDecimal monthInterest;
-		BigDecimal capital = invest;
-		BigDecimal tmpCapital = BigDecimal.ZERO;
-		BigDecimal sumInterest = BigDecimal.ZERO;
-		for (int i = 1; i < month + 1; i++) {
-			capital = capital.subtract(tmpCapital);
-			monthInterest = capital.multiply(new BigDecimal(monthRate)).setScale(2, BigDecimal.ROUND_HALF_UP);
-			tmpCapital = invest.multiply(new BigDecimal(monthRate * (Math.pow((1 + monthRate), i - 1)))).divide(new BigDecimal(Math.pow(1 + monthRate, month) - 1), 2, BigDecimal.ROUND_HALF_UP);
-			System.out.println("第" + i + "月利息： " + monthInterest);
-
-			sumInterest = sumInterest.add(monthInterest);
-		}
-		System.out.println("本金总和：" + sumCapital + " 利息总和：" + sumInterest);
 	}
 }
