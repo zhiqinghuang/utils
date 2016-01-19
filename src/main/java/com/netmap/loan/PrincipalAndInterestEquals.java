@@ -26,10 +26,10 @@ public class PrincipalAndInterestEquals {
 			BigDecimal interestMonth = principalRemain.multiply(yearRate).multiply(discount).divide(new BigDecimal("12"), 2, BigDecimal.ROUND_HALF_UP);
 			BigDecimal principal = monthPayment.subtract(interestMonth);
 			if (i%12 == 8) {
-				BigDecimal interestMonth1 = caculateSegmenteInterest(principalRemain, yearRate, discount, 11);
+				BigDecimal interestMonth1 = LoanUtils.caculateInterestSegmente(principalRemain, yearRate, discount, 11);
 				yearRate = new BigDecimal("0.049");
 				monthRate = yearRate.divide(new BigDecimal("12"), 12, BigDecimal.ROUND_HALF_UP);
-				BigDecimal interestMonth2 = caculateSegmenteInterest(principalRemain, yearRate, discount, 19);
+				BigDecimal interestMonth2 = LoanUtils.caculateInterestSegmente(principalRemain, yearRate, discount, 19);
 				interestMonth = interestMonth1.add(interestMonth2);
 				monthPayment = principal.add(interestMonth);
 			}
@@ -51,11 +51,6 @@ public class PrincipalAndInterestEquals {
 			System.out.print("	");
 			System.out.println(principalRemain);
 		}
-	}
-
-	public static BigDecimal caculateSegmenteInterest(BigDecimal principalRemain, BigDecimal yearRate, BigDecimal discount, int segmentDays){
-		BigDecimal interestMonth1 = principalRemain.multiply(yearRate).multiply(discount).multiply(new BigDecimal(segmentDays)).divide(new BigDecimal("30"), 8, BigDecimal.ROUND_HALF_UP).divide(new BigDecimal("12"), 2, BigDecimal.ROUND_HALF_UP);
-		return interestMonth1;
 	}
 
 	public static BigDecimal caculateMonthPayment(BigDecimal principalRemain, BigDecimal monthRate, BigDecimal discount, int liMonth){
