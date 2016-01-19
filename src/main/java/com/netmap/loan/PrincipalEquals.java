@@ -8,7 +8,6 @@ public class PrincipalEquals {
 		BigDecimal invest = new BigDecimal("960000"); // 本金
 		BigDecimal yearRate = new BigDecimal("0.0565"); // 年利率
 		BigDecimal year = new BigDecimal("30");// 期限
-		BigDecimal monthRate = yearRate.divide(new BigDecimal("12"), 8, BigDecimal.ROUND_HALF_UP);
 		BigDecimal month = year.multiply(new BigDecimal("12"));
 		BigDecimal discount = new BigDecimal("0.95");
 		System.out.println(month.intValue());
