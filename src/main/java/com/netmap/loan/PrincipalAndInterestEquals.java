@@ -24,17 +24,18 @@ public class PrincipalAndInterestEquals {
 		BigDecimal monthRemain = month;
 		for (int i = 1; i <= liMonth; i++) {
 			BigDecimal interestMonth = principalRemain.multiply(yearRate).multiply(discount).divide(new BigDecimal("12"), 2, BigDecimal.ROUND_HALF_UP);
+			BigDecimal principal = monthPayment.subtract(interestMonth);
 			if (i%12 == 8) {
 				BigDecimal interestMonth1 = caculateSegmenteInterest(principalRemain, yearRate, discount, 11);
 				yearRate = new BigDecimal("0.049");
 				monthRate = yearRate.divide(new BigDecimal("12"), 12, BigDecimal.ROUND_HALF_UP);
 				BigDecimal interestMonth2 = caculateSegmenteInterest(principalRemain, yearRate, discount, 19);
 				interestMonth = interestMonth1.add(interestMonth2);
+				monthPayment = principal.add(interestMonth);
 			}
 			if (i%12 == 9) {
-				monthPayment = caculateMonthPayment(invest, monthRate, discount, monthRemain.intValue());
+				monthPayment = caculateMonthPayment(principalRemain, monthRate, discount, monthRemain.intValue());
 			}
-			BigDecimal principal = monthPayment.subtract(interestMonth);
 			monthRemain = monthRemain.subtract(new BigDecimal("1"));
 			if (i == liMonth) {
 				principal = principalRemain;
