@@ -52,13 +52,11 @@ public class PrincipalEquals {
 		LocalDate localDate = LocalDate.parse(strFirstPaymentDate);
 		localDate = localDate.plusMonths(indexMonth);
 		localDate = new LocalDate(localDate.getYear(), 1, 1);
-		System.out.println(localDate);
 		BigDecimal rate = BigDecimal.ZERO;
 		int liRateListSize = rateList.size();
 		for(int i=0;i<liRateListSize;i++){
 			String[] strArrayRate = rateList.get(i);
 			LocalDate localDateRateOn = LocalDate.parse(strArrayRate[0]);
-			System.out.println(localDateRateOn);
 			if(localDateRateOn.isBefore(localDate)){
 				rate = new BigDecimal(strArrayRate[1]).multiply(new BigDecimal("0.01"));;
 				break;
