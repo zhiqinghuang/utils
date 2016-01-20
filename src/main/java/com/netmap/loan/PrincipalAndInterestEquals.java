@@ -1,55 +1,65 @@
 package com.netmap.loan;
 
 import java.math.BigDecimal;
+import java.util.List;
+
+import org.joda.time.LocalDate;
 
 public class PrincipalAndInterestEquals {
 
 	public static void main(String[] args) {
-		caculate();
+		String lstrInvest = "810000";
+		String strRate = "5.40";
+		String strDuration = "18";
+		String strDiscount = "0.95";
+		String strFirstPaymentDate = "2015-10-18";
+		String strLoanDate = "2015-09-01";
+		caculate(lstrInvest, strRate, strDuration, strDiscount, strFirstPaymentDate, strLoanDate);
 	}
 
-	public static void caculate() {
-		BigDecimal invest = new BigDecimal("960000");
-		BigDecimal yearRate = new BigDecimal("0.0565");
-		BigDecimal year = new BigDecimal("30");
+	public static void caculate(String strInvest, String strRate, String strDuration, String strDiscount, String strFirstPaymentDate, String strLoanDate) {
+		List<String[]> rateList = LoanUtils.buildRateList();
+		BigDecimal invest = new BigDecimal(strInvest);
+		BigDecimal yearRate = new BigDecimal(strRate).multiply(new BigDecimal("0.01"));
+		BigDecimal year = new BigDecimal(strDuration);
 		BigDecimal monthRate = yearRate.divide(new BigDecimal("12"), 12, BigDecimal.ROUND_HALF_UP);
 		BigDecimal month = year.multiply(new BigDecimal("12"));
-		BigDecimal discount = new BigDecimal("0.95");
-		System.out.println(month.intValue());
+		BigDecimal discount = new BigDecimal(strDiscount);
+		LocalDate localDate = LocalDate.parse(strFirstPaymentDate);
+		int liMonthsToNextYear = 13 - localDate.getMonthOfYear() + 1;
+		int liDaysFromFirstOfMonth = localDate.getDayOfMonth() - 1;
+		int liDaysPaymentDayToEndOfMonth = 30 - liDaysFromFirstOfMonth;
 		int liMonth = month.intValue();
 		BigDecimal monthPayment = caculateMonthPayment(invest, monthRate, discount, liMonth);
-		System.out.println(monthPayment);
 		BigDecimal lastPrincipal = BigDecimal.ZERO;
 		BigDecimal principalRemain = invest.subtract(lastPrincipal);
 		BigDecimal monthRemain = month;
+		boolean isRateChange = false;
 		for (int i = 1; i <= liMonth; i++) {
 			BigDecimal interestMonth = principalRemain.multiply(yearRate).multiply(discount).divide(new BigDecimal("12"), 2, BigDecimal.ROUND_HALF_UP);
-			BigDecimal principal = monthPayment.subtract(interestMonth);
-			if (i%12 == 8) {
-				BigDecimal interestMonth1 = LoanUtils.caculateInterestSegmente(principalRemain, yearRate, discount, 11);
-				yearRate = new BigDecimal("0.049");
-				monthRate = yearRate.divide(new BigDecimal("12"), 12, BigDecimal.ROUND_HALF_UP);
-				BigDecimal interestMonth2 = LoanUtils.caculateInterestSegmente(principalRemain, yearRate, discount, 19);
-				interestMonth = interestMonth1.add(interestMonth2);
-				monthPayment = principal.add(interestMonth);
-			}
-			if (i%12 == 9) {
+			if (i%12 == liMonthsToNextYear + 1 && isRateChange == true) {
 				monthPayment = caculateMonthPayment(principalRemain, monthRate, discount, monthRemain.intValue());
+				isRateChange = false;
+			}
+			BigDecimal principal = monthPayment.subtract(interestMonth);
+			if (i%12 == liMonthsToNextYear) {
+				BigDecimal yearRateTemp = LoanUtils.fetchRate(rateList, i, strFirstPaymentDate);
+				if(!yearRate.equals(yearRateTemp)){
+					isRateChange = true;
+					BigDecimal interestMonth1 = LoanUtils.caculateInterestSegmente(principalRemain, yearRate, discount, liDaysPaymentDayToEndOfMonth);
+					yearRate = yearRateTemp;
+					monthRate = yearRate.divide(new BigDecimal("12"), 12, BigDecimal.ROUND_HALF_UP);
+					BigDecimal interestMonth2 = LoanUtils.caculateInterestSegmente(principalRemain, yearRate, discount, liDaysFromFirstOfMonth);
+					interestMonth = interestMonth1.add(interestMonth2);
+					monthPayment = principal.add(interestMonth);
+				}
 			}
 			monthRemain = monthRemain.subtract(new BigDecimal("1"));
 			if (i == liMonth) {
 				principal = principalRemain;
 			}
 			principalRemain = principalRemain.subtract(principal);
-			System.out.print(i);
-			System.out.print("	");
-			System.out.print(principal);
-			System.out.print("	");
-			System.out.print(interestMonth);
-			System.out.print("	");
-			System.out.print(interestMonth.add(principal));
-			System.out.print("	");
-			System.out.println(principalRemain);
+			LoanUtils.printPaymentSchedule(i, principal, interestMonth, principalRemain);
 		}
 	}
 
