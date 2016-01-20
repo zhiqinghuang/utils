@@ -3,7 +3,6 @@ package com.netmap.loan;
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.joda.time.Days;
 import org.joda.time.LocalDate;
 
 public class PrincipalAndInterestEquals {
@@ -37,8 +36,8 @@ public class PrincipalAndInterestEquals {
 		BigDecimal monthRemain = month;
 		boolean isRateChange = false;
 		LocalDate localLoanDate = LocalDate.parse(strLoanDate);
-		int liDaysOnPre = Days.daysBetween(localLoanDate, localDate).getDays();
-		BigDecimal interestOnPre = invest.multiply(yearRate).multiply(discount).divide(new BigDecimal("12"), 2, BigDecimal.ROUND_HALF_UP);
+		int liDaysOnPre = LoanUtils.getDaysOnPre(localLoanDate, localDate, "ISDA30360")%30;
+		BigDecimal interestOnPre = invest.multiply(yearRate).multiply(discount).multiply(new BigDecimal(liDaysOnPre)).divide(new BigDecimal(12 * 30), 2, BigDecimal.ROUND_HALF_UP);
 		for (int i = 1; i <= liMonth; i++) {
 			BigDecimal interestMonth = principalRemain.multiply(yearRate).multiply(discount).divide(new BigDecimal("12"), 2, BigDecimal.ROUND_HALF_UP);
 			if (i%12 == liMonthsToNextYear + 1 && isRateChange == true) {

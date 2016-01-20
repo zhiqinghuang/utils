@@ -9,6 +9,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
 
 import com.netmap.loan.date.Frequency;
+import com.netmap.loan.date.daycount.DaycountCalculator;
+import com.netmap.loan.date.daycount.DaycountCalculatorFactory;
 
 public class LoanUtils {
 	public static BigDecimal caculateInterestSegmente(BigDecimal principalRemain, BigDecimal yearRate, BigDecimal discount, int segmentDays) {
@@ -97,5 +99,22 @@ public class LoanUtils {
 			return 12 / frequency.getPeriodAmount();
 		}
 		return frequency.getPeriodAmount();
+	}
+
+	public static int getDaysOnPre(LocalDate fromDate, LocalDate toDate, String strDayCountType) {
+		try {
+			DaycountCalculator daycountCalculator = DaycountCalculatorFactory.newInstance().getDaycountCalculator(strDayCountType);
+			int liDaysOnPre = daycountCalculator.daysBetween(fromDate, toDate);
+			return liDaysOnPre;
+		} catch (ClassNotFoundException e1) {
+			e1.printStackTrace();
+		} catch (InstantiationException e1) {
+			e1.printStackTrace();
+		} catch (IllegalAccessException e1) {
+			e1.printStackTrace();
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+		return 0;
 	}
 }

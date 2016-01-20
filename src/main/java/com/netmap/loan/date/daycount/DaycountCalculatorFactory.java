@@ -56,10 +56,7 @@ public abstract class DaycountCalculatorFactory {
 	public abstract DaycountCalculator getISDA30360();
 
 	public DaycountCalculator getDaycountCalculator(String name) throws Exception {
-		//EE-7438_1 update bill huang 2014-05-05 - begin
-		//if(name.equals("1") || name.equals("ISDAActualActual")) {
 		if(name.equals("1") || name.equals("ISDAActualActual") || name.equals("D")) {
-		//EE-7438_1 update bill huang 2014-05-05 - end
 			return getISDAActualActual();
 		} else if (name.equals("2") || name.equals("ISMAActualActual")) {
 			return getISMAActualActual();
@@ -89,10 +86,7 @@ public abstract class DaycountCalculatorFactory {
 			return getBond30360();
 		} else if (name.equals("EuroBond30360")) {
 			return getEuroBond30360();
-		//EE-7438_1 update bill huang 2014-05-05 - begin
-		//} else if(name.equals("ISDA30360")) {
 		} else if(name.equals("ISDA30360") || name.equals("M")) {
-		//EE-7438_1 update bill huang 2014-05-05 - end
 			return getISDA30360();
 		} else {
 			throw new Exception("Unknown day count calculator \"" + name + "\"");
