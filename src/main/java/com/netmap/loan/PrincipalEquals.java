@@ -45,7 +45,7 @@ public class PrincipalEquals {
 					interestMonth = interestMonth1.add(interestMonth2);
 				}
 			}
-			LoanUtils.printPaymentSchedule(i, principal, interestMonth, principalRemain);
+			LoanUtils.printPaymentSchedule(i, principal, interestMonth, principalRemain, BigDecimal.ZERO);
 		}
 	}
 }

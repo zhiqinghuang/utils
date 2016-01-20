@@ -2,9 +2,13 @@ package com.netmap.loan;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.LocalDate;
+
+import com.netmap.loan.date.Frequency;
 
 public class LoanUtils {
 	public static BigDecimal caculateInterestSegmente(BigDecimal principalRemain, BigDecimal yearRate, BigDecimal discount, int segmentDays) {
@@ -53,15 +57,45 @@ public class LoanUtils {
 		return rate;
 	}
 
-	public static void printPaymentSchedule(int i, BigDecimal principal, BigDecimal interestMonth, BigDecimal principalRemain) {
+	public static void printPaymentSchedule(int i, BigDecimal principal, BigDecimal interestMonth, BigDecimal principalRemain, BigDecimal interestOnPre) {
 		System.out.print(i);
 		System.out.print("	");
 		System.out.print(principal);
 		System.out.print("	");
 		System.out.print(interestMonth);
 		System.out.print("	");
-		System.out.print(interestMonth.add(principal));
+		if (i == 1) {
+			System.out.print(interestMonth.add(principal).add(interestOnPre));
+		} else {
+			System.out.print(interestMonth.add(principal));
+		}
 		System.out.print("	");
 		System.out.println(principalRemain);
+	}
+
+	public static int getPeriods(String lstrCouponFrequency) throws Exception {
+		Frequency frequency = null;
+		String lsFrePre = StringUtils.left(lstrCouponFrequency, 1);
+		if (lsFrePre.equalsIgnoreCase("Y")) {
+			frequency = Frequency.ANNUALLY;
+		} else if (lsFrePre.equalsIgnoreCase("H")) {
+			frequency = Frequency.SEMI_ANNUALLY;
+		} else if (lsFrePre.equalsIgnoreCase("Q")) {
+			frequency = Frequency.QUARTERLY;
+		} else if (lsFrePre.equalsIgnoreCase("M")) {
+			frequency = Frequency.MONTHLY;
+		} else if (lsFrePre.equalsIgnoreCase("W")) {
+			frequency = Frequency.WEEKLY;
+		} else if (lsFrePre.equalsIgnoreCase("D")) {
+			frequency = Frequency.DAILY;
+		} else if (lsFrePre.equalsIgnoreCase("B")) {
+			frequency = Frequency.BI_MONTHLY;
+		} else if (lsFrePre.equalsIgnoreCase("A")) {
+			frequency = Frequency.ATMATURITY;
+		}
+		if (frequency.getPeriodUnit() == Calendar.MONTH) {
+			return 12 / frequency.getPeriodAmount();
+		}
+		return frequency.getPeriodAmount();
 	}
 }
