@@ -78,11 +78,10 @@ public class DaycountCalculatorFactoryImpl extends DaycountCalculatorFactory {
 		return new String[] { "ISDAActualActual", "ISMAActualActual", "AFBActualActual", "ISDA30Actual", "ISMA30Actual", "AFB30Actual", "US30360", "EU30365", "EU30360", "IT30360", "Actual360", "Actual365Fixed", "Actual366", "Bond30360", "EuroBond30360", "ISDA30360" };
 	}
 
-/*	public static void main(String[] args) {
+	public static void main(String[] args) {
 		testStartDay();
-
 	}
-*/
+
 	public static void testStartDay() {
 		try {
 			String[] strArray = { "Bond30360", "EuroBond30360", "ISDA30360", "1", "US30360", "EU30360" };
