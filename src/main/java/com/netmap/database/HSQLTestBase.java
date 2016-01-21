@@ -1,6 +1,5 @@
 package com.netmap.database;
 
-import java.io.PrintWriter;
 import java.sql.SQLException;
 
 import org.hibernate.cfg.Configuration;
