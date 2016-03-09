@@ -252,12 +252,6 @@ public class CompressUtil {
 				//这是密码结果
 				String result = s+array[i];
 				System.out.println(result);
-				try {
-					unzip("D:\\SSA  用户搜索心理与行为分析_（美）罗森菲尔德著_北京：清华大学出版社_2014.01_P202_完整版 PDF电子书下载 带索引书签目录.zip", "D:\\tmp", result);
-					break;
-				} catch (ZipException e) {
-					//e.printStackTrace();
-				}
 			}
 		} else {
 			for(int i=0; i<array.length; i++) {
