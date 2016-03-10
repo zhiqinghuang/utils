@@ -1,0 +1,1 @@
+mvn org.asciidoctor:asciidoctor-maven-plugin:process-asciidoc
