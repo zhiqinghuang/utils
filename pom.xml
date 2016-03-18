@@ -3,6 +3,12 @@
 	<groupId>com.netmap</groupId>
 	<artifactId>utils</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<repositories>
+		<repository>
+			<id>jgit-repository</id>
+			<url>https://repo.eclipse.org/content/groups/releases/</url>
+		</repository>
+	</repositories>
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -63,6 +69,35 @@
 			<groupId>org.asciidoctor</groupId>
 			<artifactId>asciidoctorj</artifactId>
 			<version>1.5.4</version>
+		</dependency>
+		<!-- Core Library -->
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit</artifactId>
+			<version>4.2.0.201601211800-r</version>
+		</dependency>
+		<!-- Smart HTTP Servlet -->
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit.http.server</artifactId>
+			<version>4.2.0.201601211800-r</version>
+		</dependency>
+		<!-- AWT UI Helpers -->
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit.ui</artifactId>
+			<version>4.2.0.201601211800-r</version>
+		</dependency>
+		<!-- JUnit Test Support -->
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit.junit</artifactId>
+			<version>4.2.0.201601211800-r</version>
+		</dependency>
+		<dependency>
+			<groupId>org.kohsuke</groupId>
+			<artifactId>github-api</artifactId>
+			<version>1.73</version>
 		</dependency>
 	</dependencies>
 	<build>
