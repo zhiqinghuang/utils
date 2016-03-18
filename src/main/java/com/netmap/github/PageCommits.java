@@ -43,7 +43,7 @@ public class PageCommits {
 	 */
 	public static void main(String[] args) throws IOException {
 		final int size = 25;
-		final RepositoryId repo = new RepositoryId("github", "hubot");
+		final RepositoryId repo = new RepositoryId("zhiqinghuang", "utils");
 		final String message = "   {0} by {1} on {2}";
 		final CommitService service = new CommitService();
 		int pages = 1;

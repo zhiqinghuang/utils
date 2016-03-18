@@ -47,7 +47,7 @@ public class GistViaOAuthToken {
 		OAuthService oauthService = new OAuthService();
 
 		// Replace with actual login and password
-		oauthService.getClient().setCredentials("zhiqinghuang", "bill0317");
+		oauthService.getClient().setCredentials("zhiqinghuang", "");
 
 		// Create authorization with 'gist' scope only
 		Authorization auth = new Authorization();
