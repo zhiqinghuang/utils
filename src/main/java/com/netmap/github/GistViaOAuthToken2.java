@@ -34,7 +34,7 @@ import org.eclipse.egit.github.core.service.OAuthService;
 /**
  * Create a Gist using an OAuth2 token
  */
-public class GistViaOAuthToken {
+public class GistViaOAuthToken2 {
 
 	/**
 	 * Request an OAuth2 token with 'gist' scope and then create a {@link Gist}
