@@ -8,13 +8,41 @@ import org.joda.time.LocalDate;
 public class PrincipalAndInterestEquals {
 
 	public static void main(String[] args) {
-		String lstrInvest = "810000";
-		String strRate = "5.40";
+		/*
+		 * 吴春庚 13:09:51
+			5月18余额790962.6
+			吴春庚 13:10:06
+			利率4.655
+			吴春庚 13:10:20
+			5月24日还400000
+			吴春庚 13:10:56
+			银行同时把400000的5.18-5.23的利息310.33收掉
+			吴春庚 13:11:25
+			就是说5月24总共收了400310.33
+			吴春庚 13:16:47
+			2742.27
+			黄志清 13:16:48
+			2742.27
+			黄志清 13:20:38
+			2676.31
+			黄志清 13:21:14
+			390962.6
+		 */
+		/*String lstrInvest = "390962.6";
+		String strRate = "4.90";
 		String strDuration = "18";
 		String strDiscount = "0.95";
-		String strFirstPaymentDate = "2015-10-18";
-		String strLoanDate = "2015-09-01";
+		String strFirstPaymentDate = "2016-06-18";
+		String strLoanDate = "2016-05-18";
+		caculate(lstrInvest, strRate, strDuration, strDiscount, strFirstPaymentDate, strLoanDate);*/
+		String lstrInvest = "770000";
+		String strRate = "4.90";
+		String strDuration = "18";
+		String strDiscount = "0.90";
+		String strFirstPaymentDate = "2016-11-05";
+		String strLoanDate = "2016-10-05";
 		caculate(lstrInvest, strRate, strDuration, strDiscount, strFirstPaymentDate, strLoanDate);
+
 	}
 
 	public static void caculate(String strInvest, String strRate, String strDuration, String strDiscount, String strFirstPaymentDate, String strLoanDate) {
@@ -23,7 +51,8 @@ public class PrincipalAndInterestEquals {
 		BigDecimal yearRate = new BigDecimal(strRate).multiply(new BigDecimal("0.01"));
 		BigDecimal year = new BigDecimal(strDuration);
 		BigDecimal monthRate = yearRate.divide(new BigDecimal("12"), 12, BigDecimal.ROUND_HALF_UP);
-		BigDecimal month = year.multiply(new BigDecimal("12"));
+		//BigDecimal month = new BigDecimal("208");//year.multiply(new BigDecimal("12"));
+		BigDecimal month = new BigDecimal("211");//year.multiply(new BigDecimal("12"));
 		BigDecimal discount = new BigDecimal(strDiscount);
 		LocalDate localDate = LocalDate.parse(strFirstPaymentDate);
 		int liMonthsToNextYear = 13 - localDate.getMonthOfYear() + 1;
