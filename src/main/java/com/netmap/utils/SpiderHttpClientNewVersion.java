@@ -60,11 +60,14 @@ public class SpiderHttpClientNewVersion {
 			String lstrURLBase = "http://www.njwyw.com/gsgg/xytj/";
 			String lstrLastFile = "http://www.njwyw.com/gsgg/xytj/2015/06/02162704273.html";
 			boolean isLastFile = false;
-			String filepath = "D:/tmp/wanda/";
+			String filepath = "D:/temp/wanda/";
 			HttpClient httpClient = HttpClientBuilder.create().build();
 			for (int j = 0; j < 100; j++) {
 				if (isLastFile) {
 					break;
+				}
+				if (j < 92) {
+					continue;
 				}
 				String strIndexHtml = buildIndexHtml(j);
 				HttpGet httpGet = new HttpGet(lstrURLBase + strIndexHtml);
